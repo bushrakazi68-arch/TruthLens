@@ -1,0 +1,40 @@
+# TruthLens backend dependencies - the lightweight set.
+#
+# Everything the backend needs to run EXCEPT PyTorch / PyTorch Geometric. This
+# is what the Docker image installs by default, because PyTorch alone adds about
+# 225 MB of resident memory and the free hosting tiers (Render: 512 MB) cannot
+# hold it. The spread predictor falls back to plain arithmetic without it and
+# returns identical results (see agents/spread_predictor.py).
+#
+# requirements.txt = this file + PyTorch Geometric, for a laptop or any host
+# with roughly 1 GB+ of RAM.
+#
+# This file lists DIRECT dependencies only and lets pip resolve the rest.
+# It must be saved as UTF-8: a UTF-16 file (what PowerShell's `>` produces)
+# cannot be parsed by pip on Linux build hosts.
+
+# ── API layer ────────────────────────────────────────────────
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+python-dotenv==1.2.3
+
+# ── Agent orchestration and LLM ──────────────────────────────
+langgraph==1.2.11
+groq==1.7.0
+
+# ── Persistence ──────────────────────────────────────────────
+neo4j==6.3.0
+chromadb==1.5.9
+
+# ── Ingestion ────────────────────────────────────────────────
+feedparser==6.0.11
+newsapi-python==0.2.7
+google-api-python-client==2.184.0
+requests==2.34.2
+python-dateutil==2.9.0.post0
+
+numpy==2.2.6
+
+# Reddit (praw) and Telegram (telethon) are imported lazily inside their
+# connector functions, so they are not needed for the image to boot. Add them
+# here only if those sources are switched on.

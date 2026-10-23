@@ -10,21 +10,34 @@ derived from signals we actually observe:
   - how many distinct outlets have carried the claim (from the Origin Tracer)
   - how fast those sightings arrived (outlets per day, from the timeline)
 
-The claim's real propagation graph (Claim -> Sources it appeared on, plus
-projected susceptible clusters) is assembled with PyTorch Geometric so the
+The claim's propagation graph (Claim -> Sources it appeared on, plus projected
+susceptible clusters) is assembled from the observed outlet chain, so the
 `predicted_reach` node count reflects real structure rather than a constant.
+
+PyTorch Geometric is OPTIONAL. When it is installed (a laptop, or any host with
+roughly 1 GB+ of RAM) the graph is built as a PyG `Data` object. When it is not
+(the lightweight free-tier deploy image, which has no room for ~225 MB of
+PyTorch) the same graph size is computed with plain arithmetic. Only the node
+count is ever read from the graph, so both paths return identical results;
+`GRAPH_BACKEND` reports which one is active.
 """
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-import torch
-from torch_geometric.data import Data
-
 try:  # dateutil handles both ISO and RFC-822 (RSS) timestamps
     from dateutil import parser as _dtparser
 except Exception:  # pragma: no cover
     _dtparser = None
+
+try:  # optional: absent in the lightweight deploy build
+    import torch
+    from torch_geometric.data import Data
+    GRAPH_BACKEND = "pytorch_geometric"
+except Exception:  # ImportError, or a broken/partial install
+    torch = None
+    Data = None
+    GRAPH_BACKEND = "plain"
 
 
 # Order-of-magnitude audience proxies per outlet. These are ROUGH constants,
@@ -48,6 +61,27 @@ class SpreadResult:
     reduction_pct: float = 0.0
     velocity_outlets_per_day: float = 0.0
     drivers: list = field(default_factory=list)  # human-readable feature notes
+
+
+def _graph_node_count(n_real: int, n_proj: int) -> int:
+    """
+    Node count of the propagation graph: `n_real` observed outlets chained
+    together, plus `n_proj` projected clusters attached to the last one.
+    """
+    n = n_real + n_proj
+    if GRAPH_BACKEND != "pytorch_geometric":
+        return n
+
+    src, dst = [], []
+    for i in range(1, n_real):        # outlet -> next outlet (observed chain)
+        src.append(i - 1)
+        dst.append(i)
+    for j in range(n_real, n):        # last observed outlet -> susceptible cluster
+        src.append(n_real - 1)
+        dst.append(j)
+    edge_index = torch.tensor([src or [0], dst or [0]], dtype=torch.long)
+    x = torch.tensor([[1.0]] * n, dtype=torch.float)
+    return Data(x=x, edge_index=edge_index).num_nodes
 
 
 def _parse_ts(value: str):
@@ -127,19 +161,13 @@ def predict_spread(
     proj_con = int(current * max(min(r0, 1.15), 1.0))   # containment pushes R0 -> ~1
     reduction = round((proj_unc - proj_con) / proj_unc * 100, 1) if proj_unc > 0 else 0.0
 
-    # --- assemble the real propagation graph in PyG ---
+    # --- size of the propagation graph ---
+    # Observed chain: one node per outlet that carried the claim (outlet -> next
+    # outlet). Projected: susceptible clusters hanging off the last observed
+    # outlet, scaled by risk.
     n_real = max(1, len(timeline))
-    n_proj = 1 + int(round(risk * 4))                   # projected susceptible clusters
-    n = n_real + n_proj
-    src, dst = [], []
-    for i in range(1, n_real):        # outlet -> next outlet (observed chain)
-        src.append(i - 1); dst.append(i)
-    for j in range(n_real, n):        # last observed outlet -> susceptible cluster
-        src.append(n_real - 1); dst.append(j)
-    edge_index = torch.tensor([src or [0], dst or [0]], dtype=torch.long)
-    x = torch.tensor([[1.0]] * n, dtype=torch.float)
-    graph = Data(x=x, edge_index=edge_index)
-    predicted_reach = graph.num_nodes
+    n_proj = 1 + int(round(risk * 4))
+    predicted_reach = _graph_node_count(n_real, n_proj)
 
     # Show what each factor actually CONTRIBUTED to the risk score, ranked,
     # rather than just echoing the raw inputs back.

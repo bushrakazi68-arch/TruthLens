@@ -1,42 +1,21 @@
-# TruthLens backend dependencies.
+# TruthLens backend dependencies - the FULL set (laptop, or a host with ~1 GB+ RAM).
 #
-# This file lists DIRECT dependencies only and lets pip resolve the rest.
-# It replaces a `pip freeze` dump that was (a) saved as UTF-16, which every
-# Linux build host fails to parse, and (b) missing three packages the code
-# actually imports (feedparser, google-api-python-client, newsapi-python),
-# so a container would build cleanly and then crash on the first import.
+# Everything in requirements-base.txt plus PyTorch Geometric. With these
+# installed the spread predictor assembles its propagation graph as a PyG `Data`
+# object; without them it uses plain arithmetic and returns the same numbers.
 #
-# torch is deliberately NOT pinned to a CUDA build here - the Dockerfile
-# installs the CPU-only wheel first, which is ~200 MB instead of ~2.5 GB.
-# The GPU build is pointless for this system: inference happens remotely on
-# Groq, and PyTorch Geometric is only used to assemble a small graph object.
+# The Docker image installs only requirements-base.txt by default (PyTorch adds
+# ~225 MB of memory, which does not fit the free hosting tiers). To build the
+# full image on a bigger host:
+#
+#     docker build --build-arg WITH_TORCH=1 .
+#
+# Must be saved as UTF-8 - a UTF-16 file cannot be parsed by pip on Linux.
 
-# ── API layer ────────────────────────────────────────────────
-fastapi==0.141.1
-uvicorn[standard]==0.52.4
-python-dotenv==1.2.3
+-r requirements-base.txt
 
-# ── Agent orchestration and LLM ──────────────────────────────
-langgraph==1.2.11
-groq==1.7.0
-
-# ── Persistence ──────────────────────────────────────────────
-neo4j==6.3.0
-chromadb==1.5.9
-
-# ── Ingestion ────────────────────────────────────────────────
-feedparser==6.0.11
-newsapi-python==0.2.7
-google-api-python-client==2.184.0
-requests==2.34.2
-python-dateutil==2.9.0.post0
-
-# ── Spread graph assembly ────────────────────────────────────
-# Installed from the CPU index by the Dockerfile; see the note above.
+# ── Spread graph assembly (optional at runtime) ──────────────
+# Use the CPU-only wheel (~200 MB instead of ~2.5 GB for CUDA):
+#     pip install torch==2.14.0 --index-url https://download.pytorch.org/whl/cpu
 torch==2.14.0
 torch-geometric==2.8.0.post1
-numpy==2.2.6
-
-# Reddit (praw) and Telegram (telethon) are imported lazily inside their
-# connector functions, so they are not needed for the image to boot. Add them
-# here only if those sources are switched on.

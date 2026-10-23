@@ -675,5 +675,78 @@ class TestAuditChainWriting(unittest.TestCase):
                 self.assertEqual(nc.verify_claim_chain(CLAIM)["status"], "intact")
 
 
+# --------------------------------------------------------------------------
+# 9. PyTorch is optional: the lightweight deploy image runs without it
+# --------------------------------------------------------------------------
+import subprocess  # noqa: E402
+
+from agents import spread_predictor as sp  # noqa: E402
+
+_GRID = [
+    dict(severity=s, suspicion_score=sus, is_misinformation=mis, detection_confidence=c,
+         outlet_count=n, timeline=tl)
+    for s in (1, 5, 10) for sus in (0.0, 0.7) for mis in (True, False)
+    for c in (0.3, 0.95) for n, tl in ((0, []), (2, TL3[:2]), (3, TL3))
+]
+
+# Runs in a fresh interpreter in which torch / torch_geometric cannot be imported
+# (setting a sys.modules entry to None makes `import` raise ImportError).
+_NO_TORCH_PROBE = """
+import sys, json
+sys.modules['torch'] = None
+sys.modules['torch_geometric'] = None
+sys.modules['torch_geometric.data'] = None
+from agents import spread_predictor as sp
+tl = [{"platform": "youtube", "timestamp": "2026-09-01T00:00:00Z"},
+      {"platform": "rss", "timestamp": "2026-09-02T00:00:00Z"}]
+r = sp.predict_spread("c", severity=9, suspicion_score=0.5, is_misinformation=True,
+                      detection_confidence=0.9, outlet_count=2, timeline=tl)
+print(json.dumps({"backend": sp.GRAPH_BACKEND, "risk": r.risk_score,
+                  "reach": r.predicted_reach, "r0": r.r0}))
+"""
+
+_NO_TORCH_BOOT = """
+import sys
+sys.modules['torch'] = None
+sys.modules['torch_geometric'] = None
+sys.modules['torch_geometric.data'] = None
+import main                                   # the whole FastAPI app
+from agents import spread_predictor as sp
+print("BOOTED", sp.GRAPH_BACKEND, "torch_loaded=" + str("torch" in sys.modules and sys.modules["torch"] is not None))
+"""
+
+
+def _run_without_torch(code):
+    return subprocess.run([sys.executable, "-c", code], cwd=BACKEND,
+                          capture_output=True, text=True, timeout=240)
+
+
+class TestTorchIsOptional(unittest.TestCase):
+    @unittest.skipUnless(sp.GRAPH_BACKEND == "pytorch_geometric", "PyTorch Geometric not installed here")
+    def test_TC79_plain_and_pytorch_backends_return_identical_results(self):
+        for kw in _GRID:
+            with_pyg = predict_spread("claim", **kw)
+            with mock.patch.object(sp, "GRAPH_BACKEND", "plain"):
+                plain = predict_spread("claim", **kw)
+            self.assertEqual(with_pyg, plain, f"backends disagree for {kw}")
+
+    def test_TC80_spread_predictor_imports_and_runs_with_torch_blocked(self):
+        r = _run_without_torch(_NO_TORCH_PROBE)
+        self.assertEqual(r.returncode, 0, r.stderr[-600:])
+        out = json.loads(r.stdout.strip().splitlines()[-1])
+        self.assertEqual(out["backend"], "plain")
+        tl = [{"platform": "youtube", "timestamp": "2026-09-01T00:00:00Z"},
+              {"platform": "rss", "timestamp": "2026-09-02T00:00:00Z"}]
+        expected = predict_spread("c", severity=9, suspicion_score=0.5, is_misinformation=True,
+                                  detection_confidence=0.9, outlet_count=2, timeline=tl)
+        self.assertEqual((out["risk"], out["reach"], out["r0"]),
+                         (expected.risk_score, expected.predicted_reach, expected.r0))
+
+    def test_TC81_whole_backend_boots_with_torch_blocked(self):
+        r = _run_without_torch(_NO_TORCH_BOOT)
+        self.assertEqual(r.returncode, 0, r.stderr[-800:])
+        self.assertIn("BOOTED plain", r.stdout)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

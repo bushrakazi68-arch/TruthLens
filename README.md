@@ -88,7 +88,7 @@ NewsAPI / YouTube / RSS
 | Embeddings | Sentence-Transformers `all-MiniLM-L6-v2` (squared-L2) |
 | Vector store | ChromaDB — `misinformation_knowledge`, `claim_index` |
 | Graph store | Neo4j Aura — `:Claim`, `:Source`, `:Review`, `:AuditEvent` |
-| Graph ML | PyTorch, PyTorch Geometric |
+| Spread graph | PyTorch Geometric (optional; plain-Python fallback in the lightweight build, see below) |
 | API | FastAPI + Uvicorn |
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, Framer Motion |
 
@@ -158,6 +158,19 @@ curl -X POST "http://127.0.0.1:8000/api/ingest/bulk?max_total=10"
 ```
 
 ---
+
+## Lightweight deployment build
+
+The spread predictor assembles each claim's propagation graph with PyTorch Geometric **when it is
+installed**, and with plain arithmetic when it is not. Only the node count is ever read from the
+graph, so both paths return identical results (a test checks this across 144 input combinations),
+and `agents/spread_predictor.GRAPH_BACKEND` reports which one is active.
+
+PyTorch adds roughly 225 MB of resident memory (measured: 468 MB with it, 244 MB without), which a
+512 MB free-tier instance cannot hold. The Docker image therefore installs `requirements-base.txt`
+(no PyTorch) by default, and the hosted demo runs the lightweight path. Locally, and on any host with
+about 1 GB or more, install `requirements.txt` for the full build, or build the image with
+`docker build --build-arg WITH_TORCH=1 .`.
 
 ## Configuration
 

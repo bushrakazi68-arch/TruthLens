@@ -25,17 +25,25 @@ ENV HOME=/home/user \
 WORKDIR /app
 
 # ── Python dependencies ──────────────────────────────────────
-# CPU-only torch first, from PyTorch's own index. This is the difference
-# between a ~200 MB install and a ~2.5 GB one: the CUDA build is useless here
-# because LLM inference happens remotely on Groq and PyTorch Geometric is only
-# used to assemble a small graph object.
-COPY backend/requirements.txt /app/backend/requirements.txt
+# By default only the LIGHTWEIGHT set is installed (requirements-base.txt, no
+# PyTorch). PyTorch adds ~225 MB of resident memory, and free hosting tiers
+# (Render: 512 MB) cannot hold it alongside the app. The spread predictor falls
+# back to plain arithmetic and returns identical results.
+#
+# On a host with ~1 GB+ of RAM, build the full image with PyTorch Geometric:
+#     docker build --build-arg WITH_TORCH=1 .
+ARG WITH_TORCH=0
+COPY backend/requirements-base.txt /app/backend/requirements-base.txt
 RUN python3 -m venv /opt/venv
 ENV PATH=/opt/venv/bin:$PATH
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu \
-         torch==2.14.0 \
-    && pip install --no-cache-dir -r /app/backend/requirements.txt
+    && pip install --no-cache-dir -r /app/backend/requirements-base.txt
+# CPU-only torch wheel (~200 MB instead of ~2.5 GB for CUDA); inference runs
+# remotely on Groq, so a GPU build would be pointless.
+RUN if [ "$WITH_TORCH" = "1" ]; then \
+      pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.14.0 \
+      && pip install --no-cache-dir torch-geometric==2.8.0.post1 ; \
+    fi
 
 # ── Node dependencies and client build ───────────────────────
 COPY package.json package-lock.json* ./

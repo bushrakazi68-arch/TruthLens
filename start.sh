@@ -44,8 +44,12 @@ except Exception:
 echo "[start] evidence corpus holds ${DOC_COUNT} document(s)"
 
 if [ "${DOC_COUNT}" -lt 10 ]; then
-  echo "[start] corpus looks empty - seeding from fact-check feeds in the background"
-  python -m storage.seed_evidence > /tmp/seed.log 2>&1 &
+  echo "[start] corpus looks empty - seeding from fact-check feeds before serving"
+  # Run to completion (bounded) rather than in the background: a third Python
+  # process next to the API and the web server pushed a 512 MB instance over its
+  # memory limit. Seeding is best effort - a failure must not stop the app.
+  timeout 240 python -m storage.seed_evidence > /tmp/seed.log 2>&1 \
+    || echo "[start] seeding did not finish cleanly (see /tmp/seed.log); continuing"
 fi
 
 # ── 4. Serve the client ──────────────────────────────────────
