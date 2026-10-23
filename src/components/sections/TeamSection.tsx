@@ -6,7 +6,6 @@ export const TeamSection: React.FC = () => {
   const team = [
     // Filenames contain spaces, so they are percent-encoded for the URL.
     { name: 'Hajra Khan', role: 'Team Leader', avatar: '/team/Hajra%20Khan.jpeg' },
-    { name: 'Insha Ansari', role: '', avatar: '/team/Insha%20Ansari.jpeg' },
     { name: 'Shifa Shaikh', role: '', avatar: '/team/Shifa%20Shaikh.jpeg' },
     { name: 'Bushra Kazi', role: '', avatar: '/team/Bushra%20Kazi.jpeg' },
   ];
@@ -48,7 +47,7 @@ export const TeamSection: React.FC = () => {
         </div>
 
         {/* Team Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {team.map((member, index) => (
             <motion.div
               key={member.name}

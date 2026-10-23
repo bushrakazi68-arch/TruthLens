@@ -1,0 +1,292 @@
+{
+  "n": 20,
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "tp": 10,
+  "fp": 0,
+  "tn": 10,
+  "fn": 0,
+  "rows": [
+    {
+      "claim": "Drinking bleach cures COVID-19, doctors are hiding it from you.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.99,
+      "severity": 10,
+      "status": "review_required",
+      "category": "public_health",
+      "rationale": "Severity anchor 10: claim could kill/injure if acted on.",
+      "techniques": [
+        "conspiracy framing",
+        "fabricated authority",
+        "missing source",
+        "emotional appeal"
+      ]
+    },
+    {
+      "claim": "5G towers spread the coronavirus and are being switched on to depopulate cities.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.95,
+      "severity": 7,
+      "status": "pending",
+      "category": "public_health",
+      "rationale": "conspiracy framing: false claim about 5G causing coronavirus and depopulation",
+      "techniques": [
+        "conspiracy framing",
+        "emotional appeal",
+        "missing source"
+      ]
+    },
+    {
+      "claim": "The MMR vaccine causes autism in children.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.95,
+      "severity": 7,
+      "status": "pending",
+      "category": "public_health",
+      "rationale": "False claim that MMR vaccine causes autism.",
+      "techniques": [
+        "missing source",
+        "emotional appeal"
+      ]
+    },
+    {
+      "claim": "The 2020 US presidential election was stolen through millions of fake ballots, proven by leaked documents.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 1.0,
+      "severity": 9,
+      "status": "review_required",
+      "category": "elections_civic",
+      "rationale": "false claim about election fraud",
+      "techniques": [
+        "conspiracy framing",
+        "missing source",
+        "emotional appeal"
+      ]
+    },
+    {
+      "claim": "NASA has confirmed a giant asteroid will wipe out Earth next month and is covering it up.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.95,
+      "severity": 10,
+      "status": "review_required",
+      "category": "emergency_disaster",
+      "rationale": "False claim: the post asserts a false statement about NASA and an asteroid.",
+      "techniques": [
+        "fabricated authority",
+        "false urgency",
+        "conspiracy framing",
+        "missing source"
+      ]
+    },
+    {
+      "claim": "Vaccines contain microchips that Bill Gates uses to track people.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.95,
+      "severity": 8,
+      "status": "pending",
+      "category": "public_health",
+      "rationale": "conspiracy framing: claim that Bill Gates secretly tracks people via microchips in vaccines",
+      "techniques": [
+        "conspiracy framing",
+        "fabricated authority",
+        "missing source"
+      ]
+    },
+    {
+      "claim": "Chemtrails sprayed by planes are being used to control the weather and poison the population.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.9,
+      "severity": 5,
+      "status": "pending",
+      "category": "science_tech",
+      "rationale": "Severity anchor 4-6 misleading, limited harm because the claim is false but unlikely to cause immediate physical harm.",
+      "techniques": [
+        "conspiracy framing",
+        "missing source",
+        "emotional appeal"
+      ]
+    },
+    {
+      "claim": "Eating raw garlic cures cancer, so chemotherapy is unnecessary.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.95,
+      "severity": 10,
+      "status": "review_required",
+      "category": "public_health",
+      "rationale": "false medical claim that could lead to harmful health decisions",
+      "techniques": [
+        "missing source",
+        "emotional appeal"
+      ]
+    },
+    {
+      "claim": "The Apollo moon landings were filmed in a Hollywood studio; humans never went to the moon.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.99,
+      "severity": 5,
+      "status": "pending",
+      "category": "science_tech",
+      "rationale": "Conspiracy framing - the claim is a fabricated assertion about a well-documented historical event.",
+      "techniques": [
+        "conspiracy framing",
+        "missing source"
+      ]
+    },
+    {
+      "claim": "The central bank will freeze all bank accounts tomorrow at midnight, withdraw your cash now.",
+      "truth": true,
+      "predicted": true,
+      "correct": true,
+      "confidence": 0.9,
+      "severity": 9,
+      "status": "review_required",
+      "category": "financial_panic",
+      "rationale": "Misinformation anchor: fake claim that triggers a financial panic because it claims the central bank will freeze accounts and urges cash withdrawal.",
+      "techniques": [
+        "fake urgency",
+        "missing source",
+        "financial panic"
+      ]
+    },
+    {
+      "claim": "The Earth orbits the Sun once approximately every 365 days.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 0.95,
+      "severity": 1,
+      "status": "dropped",
+      "category": "science_tech",
+      "rationale": "neutral factual reporting by a news outlet, broadly accepted as true",
+      "techniques": []
+    },
+    {
+      "claim": "Water boils at 100 degrees Celsius at sea level.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 0.99,
+      "severity": 1,
+      "status": "dropped",
+      "category": "science_tech",
+      "rationale": "fact accepted as true",
+      "techniques": []
+    },
+    {
+      "claim": "The city council voted on Tuesday to approve the new road maintenance budget.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 0.3,
+      "severity": 1,
+      "status": "dropped",
+      "category": "elections_civic",
+      "rationale": "neutral factual reporting by a news outlet",
+      "techniques": []
+    },
+    {
+      "claim": "The World Health Organization recommends adults get at least 150 minutes of moderate exercise per week.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 1.0,
+      "severity": 1,
+      "status": "dropped",
+      "category": "public_health",
+      "rationale": "broadly accepted as true; factual WHO recommendation",
+      "techniques": []
+    },
+    {
+      "claim": "Snopes reviewed the viral claim that 5G causes COVID-19 and rated it false.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 1.0,
+      "severity": 1,
+      "status": "dropped",
+      "category": "public_health",
+      "rationale": "neutral factual reporting by a news outlet",
+      "techniques": []
+    },
+    {
+      "claim": "In my opinion the new phone's camera is better than last year's model.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 0.0,
+      "severity": 1,
+      "status": "dropped",
+      "category": "science_tech",
+      "rationale": "clearly labelled opinion",
+      "techniques": []
+    },
+    {
+      "claim": "Paris is the capital of France.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 1.0,
+      "severity": 1,
+      "status": "dropped",
+      "category": "geopolitics",
+      "rationale": "Anchor: broadly accepted as true",
+      "techniques": []
+    },
+    {
+      "claim": "The measles vaccine is safe and effective at preventing measles, according to the CDC.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 1.0,
+      "severity": 1,
+      "status": "dropped",
+      "category": "public_health",
+      "rationale": "broadly accepted as true",
+      "techniques": []
+    },
+    {
+      "claim": "Scientists published a study showing regular exercise lowers the risk of heart disease.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 0.2,
+      "severity": 1,
+      "status": "dropped",
+      "category": "public_health",
+      "rationale": "statement broadly accepted as true and backed by scientific consensus",
+      "techniques": []
+    },
+    {
+      "claim": "The football team won the championship match 2-1 on Sunday.",
+      "truth": false,
+      "predicted": false,
+      "correct": true,
+      "confidence": 0.95,
+      "severity": 1,
+      "status": "dropped",
+      "category": "other",
+      "rationale": "neutral factual reporting by a news outlet",
+      "techniques": []
+    }
+  ]
+}

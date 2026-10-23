@@ -216,6 +216,33 @@ def _append_chain_tip(claim_id: str, seq: int, digest: str, ts_iso: str):
         print(f"[audit-chain] could not write tip log: {e}")
 
 
+def _last_logged_tip(claim_id: str):
+    """
+    Newest entry the external tip log holds for `claim_id`, or None.
+
+    "Newest" means the last matching line in the file, not the highest seq:
+    the log is append-only, so file order is chronological. That keeps a claim
+    that was wiped and re-ingested (seq restarting at 0) from being compared
+    against its stale pre-wipe tip.
+    """
+    last = None
+    try:
+        with open(_CHAIN_TIP_LOG, "r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except ValueError:
+                    continue
+                if entry.get("claim_id") == claim_id:
+                    last = entry
+    except OSError:
+        return None
+    return last
+
+
 _audit_index_ready = False
 
 
@@ -360,6 +387,26 @@ def verify_claim_chain(claim_id: str) -> dict:
 
         expected_prev = e["hash"]
 
+    # Cross-check the chain's tail against the copy kept OUTSIDE the database.
+    # Hash-linking alone cannot see events deleted from the end, or a tail an
+    # attacker rewrote and re-hashed consistently; the external tip can.
+    tip_log_checked = False
+    if broken_at is None and chained:
+        logged = _last_logged_tip(claim_id)
+        if logged is not None:
+            tip_log_checked = True
+            by_seq = {e.get("seq"): e for e in chained}
+            match = by_seq.get(logged.get("seq"))
+            if match is None:
+                broken_at = chained[-1].get("seq")
+                reason = (
+                    f"tail truncated: external tip log records seq "
+                    f"{logged.get('seq')} but the chain ends at seq {broken_at}"
+                )
+            elif match.get("hash") != logged.get("hash"):
+                broken_at = match.get("seq")
+                reason = "tail rewritten: hash differs from the external tip log"
+
     if broken_at is not None:
         status = "broken"
     elif chained:
@@ -381,6 +428,7 @@ def verify_claim_chain(claim_id: str) -> dict:
         "broken_at_seq": broken_at,
         "reason": reason,
         "tip_hash": chained[-1]["hash"] if chained and broken_at is None else None,
+        "tip_log_checked": tip_log_checked,
         "algorithm": "SHA-256 per-claim hash chain",
     }
 
