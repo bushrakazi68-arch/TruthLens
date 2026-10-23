@@ -14,8 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3 python3-pip python3-venv build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Spaces run as a non-root user with UID 1000; files must be writable by it.
-RUN useradd -m -u 1000 user
+# Run as a non-root user. UID 1000 is already taken by the base image's "node"
+# user, so this one uses 1001; files must be writable by it.
+RUN useradd -m -u 1001 user
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
