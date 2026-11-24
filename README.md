@@ -244,10 +244,3 @@ src/
   components/    shared UI and visualisations
 server.ts        Express backend-for-frontend adapter
 ```
-
----
-
-## Team
-
-Built by **Hajra Khan**, **Shifa Shaikh**, **Insha Ansari** and **Bushra Kazi**
-at M.H. Saboo Siddik College of Engineering.
