@@ -24,9 +24,8 @@ export const OverlayNav: React.FC<OverlayNavProps> = ({
     { label: '06. Dashboard Showcase', id: 'dashboard' },
     { label: '07. Data & Trust Model', id: 'data-trust' },
     { label: '08. Roadmap & Progress', id: 'roadmap' },
-    { label: '09. Meet the Team', id: 'team' },
-    { label: '10. Schedule a Demo', id: 'cta' },
-    { label: '11. Live Prototype', id: 'footer' },
+    { label: '09. Schedule a Demo', id: 'cta' },
+    { label: '10. Live Prototype', id: 'footer' },
   ];
 
   return (

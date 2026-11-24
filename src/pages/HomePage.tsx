@@ -10,7 +10,6 @@ import { WhyTruthLensSection } from '../components/sections/WhyTruthLensSection'
 import { DashboardShowcaseSection } from '../components/sections/DashboardShowcaseSection';
 import { DataTrustSection } from '../components/sections/DataTrustSection';
 import { RoadmapSection } from '../components/sections/RoadmapSection';
-import { TeamSection } from '../components/sections/TeamSection';
 import { CTASection } from '../components/sections/CTASection';
 import { FooterSection } from '../components/sections/FooterSection';
 import { MainAppPage } from '../types';
@@ -37,7 +36,7 @@ export const HomePage: React.FC<HomePageProps> = ({ setPage }) => {
       {/* Fixed Slim Feed Navbar */}
       <FeedNavbar onOpenAppView={() => setPage('dashboard')} />
 
-      {/* 11 Full-Viewport Scroll Chapters */}
+      {/* 10 Full-Viewport Scroll Chapters */}
       <main className="relative z-10">
         <HeroSection
           onExploreAgents={() => scrollToSection('agents')}
@@ -57,8 +56,6 @@ export const HomePage: React.FC<HomePageProps> = ({ setPage }) => {
         <DataTrustSection />
 
         <RoadmapSection />
-
-        <TeamSection />
 
         <CTASection />
 
